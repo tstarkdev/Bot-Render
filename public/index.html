@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Estado en vivo del bot de Discord">
+    <title>Estado del Bot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="card">
+        <div class="status-dot online"></div>
+        <h1 id="nombre">GitHub Tutorial</h1>
+        <p class="status" id="estado">🟢 Cargando...</p>
+        <p class="info" id="detalles">Última actualización: <span id="hora"></span></p>
+    </div>
+
+    <script>
+        async function actualizar() {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+
+                document.getElementById('nombre').textContent = data.tag;
+                document.getElementById('estado').textContent =
+                    data.status === 'online' ? '🟢 Bot activo' : '🔴 Bot caído';
+                document.getElementById('hora').textContent =
+                    `Ping: ${data.ping}ms · Uptime: ${data.uptime} · Servidores: ${data.guilds}`;
+            } catch (e) {
+                document.getElementById('estado').textContent = '🔴 Sin conexión';
+            }
+        }
+
+        actualizar();
+        setInterval(actualizar, 30000);
+    </script>
+</body>
+
+</html>

@@ -1,20 +1,36 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const express = require('express');
+const path = require('path');
 require('dotenv').config();
 
-// --- Servidor HTTP para Render/UptimeRobot ---
+// --- Servidor HTTP ---
 const app = express();
 const PORT = process.env.PORT || 3000;
+const startTime = Date.now();
 
-app.get('/', (req, res) => {
-  res.send('Bot activo ✅');
+// Servir archivos estáticos de /public (incluye index.html y style.css)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Endpoint con datos en vivo
+app.get('/status', (req, res) => {
+  const uptimeMs = Date.now() - startTime;
+  const horas = Math.floor(uptimeMs / 3600000);
+  const minutos = Math.floor((uptimeMs % 3600000) / 60000);
+
+  res.json({
+    status: client.isReady() ? 'online' : 'offline',
+    tag: client.user?.tag || 'desconocido',
+    ping: client.ws.ping,
+    uptime: `${horas}h ${minutos}m`,
+    guilds: client.guilds.cache.size,
+  });
 });
 
 app.listen(PORT, () => {
   console.log(`Servidor HTTP escuchando en puerto ${PORT}`);
 });
 
-// --- Tu bot de Discord ---
+// --- Bot de Discord ---
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -23,7 +39,7 @@ const client = new Client({
   ],
 });
 
-client.on('ready', () => {
+client.on('clientReady', () => {
   console.log(`Bot conectado como ${client.user.tag}`);
 });
 
